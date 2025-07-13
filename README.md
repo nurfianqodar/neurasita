@@ -1,24 +1,7 @@
-# Neurasita
+# **Neurasita: Grow Together**
 
-Neurasita is the center for machine learning development related with Agricultural.
+Neurasita adalah platform yang dirancang untuk membangun ekosistem pengembang machine learning di Indonesia, dengan fokus khusus pada sektor pertanian. Platform ini menyediakan berbagai dataset dan model secara gratis untuk mendorong inovasi dalam bidang pertanian, mulai dari deteksi penyakit tanaman, pengambilan keputusan berbasis data, hingga pemuliaan tanaman dan riset lanjutan. Neurasita hadir sebagai jembatan antara teknologi dan pertanian, membuka peluang kolaborasi dan pengembangan solusi cerdas untuk masa depan pertanian Indonesia.
 
+## Mari Berkontribusi
 
-## Development
-
-### Setting Up Development Environment
-
-#### Environment Variables
-```bash
-# app configuration
-export APP_ID="api.neurasita.org"
-export APP_SECRET="secretkey"
-export HOST="127.0.0.1"
-export PORT=8080
-
-# postgres database configuration
-export PG_USER="postgres"
-export PG_PASSWORD="secretpassword"
-export PG_HOST="127.0.0.1"
-export PG_PORT=5432
-export PG_NAME="neurasita_db"
-```
+[Lihat selengkapnya](./CONTRIBUTING.md)
