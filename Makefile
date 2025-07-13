@@ -2,6 +2,7 @@
 GO=go
 SQLC=sqlc
 GOLANGCI_LINT=golangci-lint
+SQLFLUFF=sqlfluff
 
 # directories
 CMD_DIR=cmd
@@ -37,3 +38,7 @@ lint:
 	@echo "checking code..."
 	@${GO} vet ./...
 	@${GOLANGCI_LINT} run ./...
+
+sqlfmt:
+	@echo "formatting sql files..."
+	@${SQLFLUFF} fix --dialect postgres ./database/**
