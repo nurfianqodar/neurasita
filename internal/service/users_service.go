@@ -31,7 +31,7 @@ func (us *UserService) CreateUser(ctx context.Context, req *dto.CreateUserReques
 	// Validate request body
 	if err := global.Validate.Struct(req); err != nil {
 		if vErr, ok := err.(validator.ValidationErrors); ok {
-			return nil, errorw.NewValidationError(vErr)
+			return nil, errorw.FromValidationError(vErr)
 		} else {
 			log.Printf("[error] unexpected behavior on valiator: %v\n", err)
 			return nil, err

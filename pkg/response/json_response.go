@@ -19,10 +19,10 @@ func NewJSON(success bool, statusCode int, data any) *JSONResponse {
 
 // Bentuk json response standard pada aplikasi ini
 type JSONResponse struct {
-	StatusCode int `json:"statusCode"`
-	Success    bool
-	AccessedAt time.Time
-	Data       any `json:"data,omitempty"`
+	StatusCode int       `json:"statusCode"`
+	Success    bool      `json:"success"`
+	AccessedAt time.Time `json:"accessedAt"`
+	Data       any       `json:"data,omitempty"`
 }
 
 // Mengirim *JSON response ke http.ResponseWriter

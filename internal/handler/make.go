@@ -1,15 +1,23 @@
 package handler
 
 import (
+	"context"
+	"errors"
+	"log"
 	"net/http"
 
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/nurfianqodar/neurasita/internal/repository"
 	"github.com/nurfianqodar/neurasita/pkg/errorw"
 	"github.com/nurfianqodar/neurasita/pkg/response"
 )
 
 // Internal handler adalah http.HandlerFunc yang mengembalikan error
 // tipe ini di wrap oleh Make func untuk mengubahnya menjadi http.HandlerFunc
+//
+// *Note: jangan panggil w.WriteHeader(...) jika InternalHandler mengembalikan error
+// pastikan panggil w.WriteHeader hanya jika semua operasi sukses
+// karena error akan dihandle oleh Make function
 type InternalHandler func(w http.ResponseWriter, r *http.Request) error
 
 // Make func mengubah InternalHandler yang mengembalikan error menjadi HandleFunc
@@ -19,22 +27,60 @@ type InternalHandler func(w http.ResponseWriter, r *http.Request) error
 func Make(h InternalHandler) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		err := h(w, r)
-		if err != nil {
-			// Handle api error (langsung write saja)
-			if apiErr, ok := err.(*errorw.APIError); ok {
-				response.WriteJSON(w, apiErr.Response())
-				return
-			} else
-			// Handle postgres error (error yang dikembalikan dari operasi database)
-			if pgErr, ok := err.(*pgconn.PgError); ok {
-				// email sudah digunakan
-				if pgErr.ConstraintName == "uqidx_users_email_deleted_at" {
-					response.WriteJSON(w, errorw.New(http.StatusConflict, "email not avaliable", nil).Response())
-					return
-				}
-			}
-			// Default error
-			response.WriteJSON(w, errorw.NewInternalServerError().Response())
+
+		// Berhenti disini jika tidak ada error
+		if err == nil {
+			return
+		}
+
+		// Error dihandle disini untuk menghindari nested if
+
+		// Error yang bisa dikonversi
+		// (diperlukan untuk switch case dengan errors.As)
+		var (
+			apiErr *errorw.APIError
+			pgErr  *pgconn.PgError
+		)
+
+		log.Printf("[error] %v\n", err)
+
+		switch {
+
+		// APIError langsung write
+		case errors.As(err, &apiErr):
+			response.WriteJSON(w, apiErr.Response())
+
+		// PgError dihandle handlePgError
+		case errors.As(err, &pgErr):
+			handlePgError(w, pgErr)
+
+		// Context timeout error
+		case errors.Is(err, context.DeadlineExceeded):
+			response.WriteJSON(w, errorw.ErrRequestTimeout.Response())
+
+		// Error lainnya dikonversi ke internal server error
+		default:
+			response.WriteJSON(w, errorw.ErrInternalServer.Response())
 		}
 	})
+}
+
+// menagani seluruh error yang dihasilkan dari operasi repository
+func handlePgError(w http.ResponseWriter, pgErr *pgconn.PgError) {
+	// Unique index violation pada email
+	switch pgErr.Code {
+	// Unique constraint violation
+	case "23505":
+		switch pgErr.ConstraintName {
+		case repository.Cst_UqidxUsersEmailDeletedAt:
+			res := errorw.New(http.StatusConflict, "email not avaliable", nil).Response()
+			response.WriteJSON(w, res)
+		default:
+			response.WriteJSON(w, errorw.ErrConflictUniqueConstraint.Response())
+		}
+	case "22P02":
+		response.WriteJSON(w, errorw.ErrInvalidTextRepr.Response())
+	default:
+		response.WriteJSON(w, errorw.ErrInternalServer.Response())
+	}
 }

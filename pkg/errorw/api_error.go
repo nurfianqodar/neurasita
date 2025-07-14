@@ -52,20 +52,8 @@ type apiErrorDataContent struct {
 	Detail  any    `json:"detail,omitempty"`
 }
 
-// Constructor APIError untuk membuat internal server error
-// digunakan pada Make function saat ada error yang tidak dikonversi
-// ke tipe APIError
-func NewInternalServerError() *APIError {
-	return New(http.StatusInternalServerError, "internal server error", nil)
-}
-
-// Costructor APIError saat decode request body tidak berhasil
-func NewMalformedRequestBody() *APIError {
-	return New(http.StatusBadRequest, "malformed request body", nil)
-}
-
 // Mengubah validator.ValidationErrors menjadi APIError
-func NewValidationError(vErr validator.ValidationErrors) *APIError {
+func FromValidationError(vErr validator.ValidationErrors) *APIError {
 	detail := make([]map[string]string, len(vErr))
 
 	for i, fErr := range vErr {

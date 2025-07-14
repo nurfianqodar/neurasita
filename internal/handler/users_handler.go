@@ -36,7 +36,7 @@ func (uh *UserHandler) handleCreateUser(w http.ResponseWriter, r *http.Request) 
 	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 		log.Printf("[error] encode json failed: %v\n", err)
-		return errorw.NewMalformedRequestBody()
+		return errorw.ErrMalformedRequestBody
 	}
 
 	// invoke user service with timeout

@@ -40,8 +40,8 @@ type ManyUserData struct {
 // CreateUserRequest merupakan bentuk request body yang dikirim user
 // untuk membuat satu user
 type CreateUserRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"required,email,max=255"`
+	Password string `json:"password" validate:"required,min=8"`
 }
 
 // CreateUserReponse merupakan bentuk data response jika sign up (create one user)
