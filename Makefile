@@ -41,4 +41,5 @@ lint:
 
 sqlfmt:
 	@echo "formatting sql files..."
+	@${SQLFLUFF} lint --dialect postgres ./database/**
 	@${SQLFLUFF} fix --dialect postgres ./database/**

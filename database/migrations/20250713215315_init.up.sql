@@ -3,7 +3,6 @@
 -- ==================================================================== --
 -- users table berisi data kredensial user digunakan untuk autentikasi
 -- pada aplikasi.
-
 CREATE TABLE IF NOT EXISTS users (
     -- PK
     id uuid PRIMARY KEY,
@@ -17,7 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
     deleted_at timestamptz
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS uq_users_email_deleted_at
+CREATE UNIQUE INDEX IF NOT EXISTS uqidx_users_email_deleted_at
 ON users (email)
 WHERE deleted_at IS NULL;
 
@@ -37,22 +36,22 @@ CREATE TABLE IF NOT EXISTS roles (
     name varchar(32) NOT NULL,
     -- Timestamp
     created_at timestamptz DEFAULT current_timestamp,
-    updated_at timestamptz DEFAULT current_timestamp
-);
+    updated_at timestamptz DEFAULT current_timestamp,
 
-CREATE UNIQUE INDEX IF NOT EXISTS uq_roles_name
-ON roles (name);
+    CONSTRAINT uq_roles_name
+    UNIQUE (name)
+);
 
 
 -- many to many user roles relation
 CREATE TABLE IF NOT EXISTS user_roles (
-    -- PK
-    id uuid PRIMARY KEY,
-    -- Main Data
     user_id uuid NOT NULL,
     role_id uuid NOT NULL,
     -- Timestamp
     created_at timestamptz DEFAULT current_timestamp,
+
+    CONSTRAINT pk_user_roles
+    PRIMARY KEY (user_id, role_id),
 
     CONSTRAINT fk_user_roles_user_id
     FOREIGN KEY (user_id) REFERENCES users (id)
@@ -62,9 +61,6 @@ CREATE TABLE IF NOT EXISTS user_roles (
     FOREIGN KEY (role_id) REFERENCES roles (id)
     ON DELETE CASCADE
 );
-
-CREATE UNIQUE INDEX IF NOT EXISTS uq_user_roles_user_id_role_id
-ON user_roles (user_id, role_id);
 
 CREATE INDEX IF NOT EXISTS idx_user_roles_user_id
 ON user_roles (user_id);
@@ -82,22 +78,23 @@ CREATE TABLE IF NOT EXISTS permissions (
     permission varchar(64) NOT NULL,
     -- Timestamp
     created_at timestamptz DEFAULT current_timestamp,
-    updated_at timestamptz DEFAULT current_timestamp
-);
+    updated_at timestamptz DEFAULT current_timestamp,
 
-CREATE UNIQUE INDEX IF NOT EXISTS uq_permissions_permission
-ON permissions (permission);
+    CONSTRAINT uq_permissions_permission
+    UNIQUE (permission)
+);
 
 
 -- many to many user permissions relation
 CREATE TABLE IF NOT EXISTS user_permissions (
-    -- PK
-    id uuid PRIMARY KEY,
     -- Main Data
     user_id uuid NOT NULL,
     permission_id uuid NOT NULL,
     -- Timestamp
     created_at timestamptz DEFAULT current_timestamp,
+
+    CONSTRAINT pk_user_permissions
+    PRIMARY KEY (user_id, permission_id),
 
     CONSTRAINT fk_user_permissions_user_id
     FOREIGN KEY (user_id) REFERENCES users (id)
@@ -108,19 +105,19 @@ CREATE TABLE IF NOT EXISTS user_permissions (
     ON DELETE CASCADE
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS uq_user_permissions_user_id_permission_id
-ON user_permissions (user_id, permission_id);
-
+CREATE INDEX idx_user_permissions_user_id
+ON user_permissions (user_id);
 
 -- many to many role permissions relation
 CREATE TABLE IF NOT EXISTS role_permissions (
-    -- PK
-    id uuid PRIMARY KEY,
     -- Main Data
     role_id uuid NOT NULL,
     permission_id uuid NOT NULL,
     -- Timestamp
     created_at timestamptz DEFAULT current_timestamp,
+
+    CONSTRAINT pk_role_permissions
+    PRIMARY KEY (role_id, permission_id),
 
     CONSTRAINT fk_role_permissions_role_id
     FOREIGN KEY (role_id) REFERENCES roles (id)
@@ -131,5 +128,81 @@ CREATE TABLE IF NOT EXISTS role_permissions (
     ON DELETE CASCADE
 );
 
-CREATE UNIQUE INDEX uq_role_permissions_role_id_permission_id
-ON role_permissions (role_id, permission_id);
+CREATE INDEX idx_role_permissions_role_id
+ON role_permissions (role_id);
+
+-- ==================================================================== --
+-- Profiles Table
+-- ==================================================================== --
+CREATE TYPE gender AS ENUM (
+    'm',
+    'f'
+);
+
+CREATE TABLE profiles (
+    -- PK
+    id uuid PRIMARY KEY,
+    -- Main Data
+    user_id uuid NOT NULL,
+    display_name varchar(127),
+    occupation varchar(63),
+    organization varchar(127),
+    gender gender,
+    photo_url varchar(255),
+    bio varchar(255),
+    -- Timestamp
+    created_at timestamptz DEFAULT current_timestamp,
+    updated_at timestamptz DEFAULT current_timestamp,
+
+    CONSTRAINT uq_profiles_user_id
+    UNIQUE (user_id),
+
+    CONSTRAINT fk_profiles_user_id
+    FOREIGN KEY (user_id) REFERENCES users (id)
+    ON DELETE CASCADE
+);
+
+
+-- ==================================================================== --
+-- Files Table
+-- ==================================================================== --
+CREATE TABLE files (
+    -- PK
+    id uuid PRIMARY KEY,
+    -- Main Data
+    url varchar(255) NOT NULL,
+    name varchar(255) NOT NULL,
+    type varchar(64) NOT NULL,
+    hash varchar(64) NOT NULL,
+    -- Timestamp
+    created_at timestamptz DEFAULT current_timestamp,
+    updated_at timestamptz DEFAULT current_timestamp,
+    deleted_at timestamptz,
+
+    CONSTRAINT uq_files_hash
+    UNIQUE (hash)
+);
+
+-- ==================================================================== --
+-- Plants Table
+-- ==================================================================== --
+
+-- ==================================================================== --
+-- Varietes Table
+-- ==================================================================== --
+
+-- ==================================================================== --
+-- Plant Breedeng Records Table
+-- ==================================================================== --
+
+-- ==================================================================== --
+-- Climate Records Table
+-- ==================================================================== --
+
+-- ==================================================================== --
+-- Yield Records Table
+-- ==================================================================== --
+
+-- ==================================================================== --
+-- Disease Records Table
+-- ==================================================================== --
