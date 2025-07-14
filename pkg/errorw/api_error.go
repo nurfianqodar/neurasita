@@ -16,6 +16,10 @@ func New(statusCode int, message string, detail any) *APIError {
 	}
 }
 
+// APIError merupakan standar json error pada aplikasi ini
+// pastikan konversi error ke tipe ini jika error merupakan
+// kesalahan client seperti error validasi dan pelanggaran unique
+// constraint database.
 type APIError struct {
 	StatusCode int
 	Message    string
@@ -26,6 +30,8 @@ func (ae *APIError) Error() string {
 	return ae.Message
 }
 
+// Response method mengembalikan JSONResponse yang siap dikirim
+// melalui fungsi WriteJSON.
 func (ae *APIError) Response() *response.JSONResponse {
 	return response.NewJSON(false, ae.StatusCode, &apiErrorData{
 		Error: &apiErrorDataContent{
@@ -35,25 +41,30 @@ func (ae *APIError) Response() *response.JSONResponse {
 	})
 }
 
-// Type helper
+// Type helper untuk standarisasi error response (private)
 type apiErrorData struct {
 	Error *apiErrorDataContent `json:"error"`
 }
 
-// Type helper
+// Type helper untuk standarisasi error response (private)
 type apiErrorDataContent struct {
 	Message string `json:"message"`
 	Detail  any    `json:"detail,omitempty"`
 }
 
+// Constructor APIError untuk membuat internal server error
+// digunakan pada Make function saat ada error yang tidak dikonversi
+// ke tipe APIError
 func NewInternalServerError() *APIError {
 	return New(http.StatusInternalServerError, "internal server error", nil)
 }
 
+// Costructor APIError saat decode request body tidak berhasil
 func NewMalformedRequestBody() *APIError {
 	return New(http.StatusBadRequest, "malformed request body", nil)
 }
 
+// Mengubah validator.ValidationErrors menjadi APIError
 func NewValidationError(vErr validator.ValidationErrors) *APIError {
 	detail := make([]map[string]string, len(vErr))
 

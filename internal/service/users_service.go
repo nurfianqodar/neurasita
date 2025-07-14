@@ -1,3 +1,5 @@
+// User service package
+
 package service
 
 import (
@@ -13,14 +15,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Constructor untuk *UserService
 func NewUserService(q *repository.Queries) *UserService {
 	return &UserService{q}
 }
 
+// Struct untuk melakukan validasi, invoke repository dan semua proses dari handling
+// request pada user management endpoints.
 type UserService struct {
 	q *repository.Queries
 }
 
+// CreateUser membuat satu user (signup) mengembalikan user id dan createdat jika berhasil
 func (us *UserService) CreateUser(ctx context.Context, req *dto.CreateUserRequest) (*dto.CreateUserReponse, error) {
 	// Validate request body
 	if err := global.Validate.Struct(req); err != nil {

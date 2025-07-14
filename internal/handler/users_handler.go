@@ -13,12 +13,15 @@ import (
 	"github.com/nurfianqodar/neurasita/pkg/response"
 )
 
+// Constructor UserHandler membuat instance *UserHandler
 func NewUserHandler(userService *service.UserService) *UserHandler {
 	return &UserHandler{userService}
 }
 
+// Memastikan implementasi Handler
 var _ Handler = (*UserHandler)(nil)
 
+// User handler berisi semua operasi dan routing untuk manajemen user
 type UserHandler struct {
 	userService *service.UserService
 }
