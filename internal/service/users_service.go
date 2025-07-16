@@ -1,5 +1,4 @@
 // User service package
-
 package service
 
 import (
@@ -67,4 +66,22 @@ func (us *UserService) CreateUser(ctx context.Context, req *dto.CreateUserReques
 		ID:        result.ID,
 		CreatedAt: result.CreatedAt.Time,
 	}, nil
+}
+
+// Get user by id service
+func (us *UserService) GetUserByID(ctx context.Context, param *dto.GetUserByIDParam) (*dto.GetUserByIDResponse, error) {
+	result, err := us.q.GetUserByID(ctx, &repository.GetUserByIDParams{
+		ID: param.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &dto.GetUserByIDResponse{
+		ID:          result.ID,
+		Email:       result.Email,
+		EmailActive: result.EmailActive,
+		CreatedAt:   result.CreatedAt.Time,
+		UpdatedAt:   result.UpdatedAt.Time,
+	}, nil
+
 }

@@ -20,6 +20,7 @@ LIMIT $1 OFFSET $2;
 SELECT
     id,
     email,
+    email_active,
     created_at,
     updated_at
 FROM users

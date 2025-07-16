@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/nurfianqodar/neurasita/internal/dto"
 	"github.com/nurfianqodar/neurasita/internal/service"
 	"github.com/nurfianqodar/neurasita/pkg/errorw"
@@ -28,6 +29,7 @@ type UserHandler struct {
 
 func (uh *UserHandler) RegisterRouter(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/v1/users", Make(uh.handleCreateUser))
+	mux.HandleFunc("POST /api/v1/users/{id}", Make(uh.handleGetUserByID))
 }
 
 func (uh *UserHandler) handleCreateUser(w http.ResponseWriter, r *http.Request) error {
@@ -52,4 +54,29 @@ func (uh *UserHandler) handleCreateUser(w http.ResponseWriter, r *http.Request) 
 		User: user,
 	}))
 	return nil
+}
+
+// Get user by id handler
+func (uh *UserHandler) handleGetUserByID(w http.ResponseWriter, r *http.Request) error {
+	uuidString := r.PathValue("id")
+	uid, err := uuid.Parse(uuidString)
+	if err != nil {
+		return errorw.ErrInvalidUUID
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
+	defer cancel()
+	user, err := uh.userService.GetUserByID(ctx, &dto.GetUserByIDParam{
+		ID: uid,
+	})
+	if err != nil {
+		return err
+	}
+
+	response.WriteJSON(w, response.NewJSON(true, http.StatusOK, &dto.SingleUserData{
+		User: user,
+	}))
+
+	return nil
+
 }

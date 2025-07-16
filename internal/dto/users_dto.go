@@ -53,3 +53,17 @@ type CreateUserReponse struct {
 	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"createdAt"`
 }
+
+// Tipe bantuan diubah dari path param atau jwt token
+// digunakan untuk argumen pada get user service
+type GetUserByIDParam struct {
+	ID uuid.UUID
+}
+
+type GetUserByIDResponse struct {
+	ID          uuid.UUID `json:"id"`
+	Email       string    `json:"email"`
+	EmailActive bool      `json:"emailActive"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+}

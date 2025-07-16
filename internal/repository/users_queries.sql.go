@@ -42,6 +42,7 @@ const getUserByID = `-- name: GetUserByID :one
 SELECT
     id,
     email,
+    email_active,
     created_at,
     updated_at
 FROM users
@@ -54,10 +55,11 @@ type GetUserByIDParams struct {
 }
 
 type GetUserByIDRow struct {
-	ID        uuid.UUID          `db:"id"`
-	Email     string             `db:"email"`
-	CreatedAt pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	ID          uuid.UUID          `db:"id"`
+	Email       string             `db:"email"`
+	EmailActive bool               `db:"email_active"`
+	CreatedAt   pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `db:"updated_at"`
 }
 
 func (q *Queries) GetUserByID(ctx context.Context, arg *GetUserByIDParams) (*GetUserByIDRow, error) {
@@ -66,6 +68,7 @@ func (q *Queries) GetUserByID(ctx context.Context, arg *GetUserByIDParams) (*Get
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
+		&i.EmailActive,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
